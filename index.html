@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#20170f">
+<title>ケーレブン - 2投チャレンジ</title>
+<style>
+:root{--wood:#b8793d;--cream:#f4dfb6;--ink:#20170f;--gold:#ffd16a}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#17110d;color:#fff;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;touch-action:none}
+#app{height:100dvh;display:flex;flex-direction:column;max-width:700px;margin:auto;background:linear-gradient(#322116,#17110d)}
+header{padding:10px 14px 7px;display:flex;align-items:center;justify-content:space-between;gap:8px;z-index:2}
+.brand{font-weight:900;font-size:clamp(18px,5vw,25px);letter-spacing:.06em;color:var(--gold)}
+.sub{font-size:11px;color:#d7c5ac;margin-top:1px}
+button{border:1px solid #b9905b;background:#3a281b;color:#fff;border-radius:999px;padding:8px 13px;font-weight:700;font-size:13px}
+#stats{display:flex;gap:8px;padding:0 12px 8px;z-index:2}
+.stat{flex:1;text-align:center;background:#302116;border:1px solid #6f4c2b;border-radius:12px;padding:6px 3px}
+.stat span{display:block;color:#cbb69a;font-size:11px}
+.stat strong{display:block;font-size:21px;color:#fff1d2;line-height:1.25}
+#arena{position:relative;flex:1;min-height:0;overflow:hidden;background:#2b1c12}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#message{position:absolute;left:50%;top:12px;transform:translateX(-50%);width:max-content;max-width:90%;text-align:center;padding:8px 13px;border-radius:12px;background:#1b120ddc;border:1px solid #a77a48;font-size:13px;font-weight:700;pointer-events:none}
+#hint{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:92%;text-align:center;color:#fff2d8;font-size:13px;text-shadow:0 2px 4px #000;pointer-events:none}
+#bottom{padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:#20160f;border-top:1px solid #634323;display:flex;align-items:center;justify-content:space-between;gap:10px}
+#bottom small{color:#cbb69a;font-size:11px;line-height:1.5}
+#throwBtn{background:linear-gradient(#e2b56e,#a66a30);color:#24170b;border:0;padding:11px 17px;font-size:14px;white-space:nowrap}
+#overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#120c0bd9;z-index:5;padding:22px}
+.panel{width:min(360px,100%);padding:24px 20px;border:1px solid #c49350;border-radius:20px;background:linear-gradient(145deg,#50331e,#21160f);text-align:center;box-shadow:0 15px 50px #0009}
+.panel h2{font-size:28px;margin:0 0 8px;color:var(--gold)}
+.panel p{line-height:1.7;margin:8px 0 18px}
+.panel button{background:var(--gold);color:#24170b;border:0;padding:12px 20px;font-size:15px}
+@media(min-width:600px){#app{border-left:1px solid #62462b;border-right:1px solid #62462b}header{padding-top:14px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div><div class="brand">KÉLÉBUNN <span style="font-size:12px">🎳</span></div><div class="sub">ルクセンブルクの伝統ゲーム風・2投チャレンジ</div></div>
+    <button id="resetTop">最初から</button>
+  </header>
+  <div id="stats">
+    <div class="stat"><span>投球</span><strong id="round">1 / 2</strong></div>
+    <div class="stat"><span>今回の合計</span><strong id="total">0 / 8</strong></div>
+    <div class="stat"><span>今回倒した本数</span><strong id="last">—</strong></div>
+  </div>
+  <div id="arena">
+    <canvas id="game"></canvas>
+    <div id="message">球をフリックして投げよう！</div>
+    <div id="hint">球から指をすばやくスライド！ 左右で方向、フリック速度で強さ</div>
+    <div id="overlay"><div class="panel"><h2 id="resultTitle">クリア！</h2><p id="resultText"></p><button id="again">もう一度プレイ</button></div></div>
+  </div>
+  <div id="bottom"><small>まっすぐでも4〜5本ほど倒れる設定。<br>1投ごとにピンは9本すべて復活します。</small><button id="throwBtn">投球のコツ</button></div>
+</div>
+<script>
+(() => {
+ const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
+ const arena=document.getElementById('arena');
+ const $=id=>document.getElementById(id);
+ let W=0,H=0,dpr=1, throwNo=1,total=0,lastKnocked=0,ball={x:0,y:0,r:0}, pins=[], anim=null, canThrow=true, drag=null, messageTimer=null;
+ let lane={left:0,right:0,top:0,bottom:0};
+ const pinRows=[[0],[ -1,1],[-2,0,2],[-1,1],[0]];
+ function resize(){
+   const r=arena.getBoundingClientRect(); dpr=Math.min(window.devicePixelRatio||1,2); W=r.width; H=r.height;
+   canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+   lane={left:W*.13,right:W*.87,top:H*.17,bottom:H*.97};
+   ball={x:W*.5,y:H*.82,r:Math.min(W*.105,43)};
+   resetPins(); draw();
+ }
+ function resetPins(){
+   pins=[]; const baseY=H*.245, rowGap=Math.min(H*.043,25), pinGap=Math.min(W*.075,34);
+   pinRows.forEach((row,ri)=>row.forEach((col,ci)=>{
+     pins.push({x:W*.5+col*pinGap,y:baseY+ri*rowGap,r:Math.max(5,Math.min(W*.018,9)),down:false,dx:0,dy:0,rot:0});
+   }));
+ }
+ function poly(points,fill,stroke){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}}
+ function draw(){
+   ctx.clearRect(0,0,W,H);
+   // warm indoor wall and far pin area
+   const wall=ctx.createLinearGradient(0,0,0,H*.5);wall.addColorStop(0,'#d7a35c');wall.addColorStop(1,'#805027');
+   ctx.fillStyle=wall;ctx.fillRect(0,0,W,H*.49);
+   // back wall panels
+   ctx.fillStyle='#3b2517';ctx.fillRect(W*.28,H*.055,W*.44,H*.205);
+   ctx.strokeStyle='#e1b977';ctx.lineWidth=3;ctx.strokeRect(W*.29,H*.065,W*.42,H*.185);
+   // target diamond markings, reminiscent of the reference
+   ctx.beginPath();ctx.moveTo(W*.5,H*.085);ctx.lineTo(W*.66,H*.15);ctx.lineTo(W*.5,H*.225);ctx.lineTo(W*.34,H*.15);ctx.closePath();ctx.strokeStyle='#d9b58a';ctx.lineWidth=2;ctx.stroke();
+   // 9 small target lights / pin guides
+   const marks=[[0,-2],[-1,-1],[1,-1],[-2,0],[0,0],[2,0],[-1,1],[1,1],[0,2]];
+   marks.forEach((m,i)=>{ctx.beginPath();ctx.arc(W*.5+m[0]*W*.035,H*.15+m[1]*H*.025,Math.max(3,W*.012),0,Math.PI*2);ctx.fillStyle=i%3===0?'#e74b69':'#b53d4c';ctx.fill();ctx.strokeStyle='#f4c8a2';ctx.lineWidth=1;ctx.stroke()});
+   // lane and gutters in perspective
+   poly([[W*.13,H*.22],[W*.87,H*.22],[W*.99,H],[W*.01,H]],'#17120e');
+   poly([[W*.19,H*.24],[W*.81,H*.24],[W*.89,H],[W*.11,H]],'#28201a');
+   poly([[W*.23,H*.25],[W*.77,H*.25],[W*.83,H],[W*.17,H]],'#b78249');
+   poly([[W*.27,H*.25],[W*.73,H*.25],[W*.77,H],[W*.23,H]],'#d3a267');
+   // lane boards
+   ctx.strokeStyle='#a87945';ctx.lineWidth=1;
+   for(let i=-5;i<=5;i++){let topX=W*.5+i*W*.023,bottomX=W*.5+i*W*.05;ctx.beginPath();ctx.moveTo(topX,H*.255);ctx.lineTo(bottomX,H);ctx.stroke()}
+   // center strip glint
+   ctx.strokeStyle='#efd09b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(W*.5,H*.27);ctx.lineTo(W*.5,H*.95);ctx.stroke();
+   // gutter channels
+   poly([[W*.13,H*.22],[W*.19,H*.24],[W*.23,H],[W*.01,H]],'#0e0b09');
+   poly([[W*.81,H*.24],[W*.87,H*.22],[W*.99,H],[W*.77,H]],'#0e0b09');
+   ctx.strokeStyle='#59402a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(W*.19,H*.24);ctx.lineTo(W*.23,H);ctx.moveTo(W*.81,H*.24);ctx.lineTo(W*.77,H);ctx.stroke();
+   // pins at far end
+   pins.forEach(p=>{
+     const scale=.7+(p.y/H)*.7, pw=Math.max(5,W*.018)*scale, ph=pw*2.6;
+     ctx.save();ctx.translate(p.x+(p.down?p.dx:0),p.y+(p.down?p.dy:0));ctx.rotate(p.down?p.rot:0);
+     if(p.down){ctx.globalAlpha=.65}
+     ctx.fillStyle='#ead8b8';ctx.strokeStyle='#8e704d';ctx.lineWidth=1;
+     ctx.beginPath();ctx.ellipse(0,ph*.45,pw*.75,pw*.45,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+     ctx.beginPath();ctx.moveTo(-pw*.65,ph*.35);ctx.quadraticCurveTo(-pw*.35,ph*.05,-pw*.35,0);ctx.quadraticCurveTo(-pw*.38,-ph*.15,0,-ph*.14);ctx.quadraticCurveTo(pw*.38,-ph*.15,pw*.35,0);ctx.quadraticCurveTo(pw*.35,ph*.05,pw*.65,ph*.35);ctx.closePath();ctx.fill();ctx.stroke();
+     ctx.strokeStyle='#b6383c';ctx.lineWidth=Math.max(1,pw*.28);ctx.beginPath();ctx.moveTo(-pw*.31,ph*.04);ctx.lineTo(pw*.31,ph*.04);ctx.stroke();
+     ctx.restore();
+   });
+   // Ball with realistic glossy shading
+   if(!anim || anim.phase!=='rolling'){
+     drawBall(ball.x,ball.y,ball.r);
+   } else {
+     drawBall(anim.x,anim.y,Math.max(5,ball.r*(.25+.75*anim.progress)));
+   }
+   if(drag && canThrow){
+     ctx.strokeStyle='#ffe5a4';ctx.lineWidth=3;ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(drag.x,drag.y);ctx.lineTo(drag.cx,drag.cy);ctx.stroke();ctx.setLineDash([]);
+     ctx.beginPath();ctx.arc(drag.cx,drag.cy,5,0,Math.PI*2);ctx.fillStyle='#fff0bd';ctx.fill();
+   }
+ }
+ function drawBall(x,y,r){
+   const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.08,x,y,r);
+   g.addColorStop(0,'#ff9b70');g.addColorStop(.35,'#c8442e');g.addColorStop(.78,'#8d241d');g.addColorStop(1,'#42130f');
+   ctx.save();ctx.shadowColor='#0009';ctx.shadowBlur=r*.35;ctx.shadowOffsetY=r*.18;
+   ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();ctx.restore();
+   ctx.strokeStyle='#f18b65';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x-r*.12,y-r*.14,r*.76,Math.PI*1.05,Math.PI*1.7);ctx.stroke();
+   // finger holes
+   [[-.25,-.12],[.08,-.28],[.23,.02]].forEach(([a,b])=>{ctx.beginPath();ctx.arc(x+a*r,y+b*r,r*.105,0,Math.PI*2);ctx.fillStyle='#35120e';ctx.fill();ctx.strokeStyle='#e26b4b';ctx.lineWidth=1;ctx.stroke()});
+ }
+ function showMessage(text){$('message').textContent=text}
+ function updateStats(){$('round').textContent=Math.min(throwNo,2)+' / 2';$('total').textContent=total+' / 8';$('last').textContent=throwNo===1?'—':lastKnocked+'本';}
+ function resetGame(){
+   throwNo=1;total=0;lastKnocked=0;anim=null;drag=null;canThrow=true;$('overlay').style.display='none';resetPins();ball={x:W*.5,y:H*.82,r:Math.min(W*.105,43)};updateStats();showMessage('球をフリックして投げよう！');$('hint').textContent='球から指をすばやくスライド！ 左右で方向、フリック速度で強さ';draw();
+ }
+ function pointerDown(e){
+   if(!canThrow || $('overlay').style.display==='flex')return;
+   const r=canvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+   if(y>H*.56){drag={x,y,cx:x,cy:y,t:performance.now()};canvas.setPointerCapture?.(e.pointerId)}
+ }
+ function pointerMove(e){if(!drag)return;const r=canvas.getBoundingClientRect();drag.cx=e.clientX-r.left;drag.cy=e.clientY-r.top;draw()}
+ function pointerUp(e){
+   if(!drag||!canThrow)return;
+   const now=performance.now(),d=drag,dx=d.cx-d.x,dy=d.cy-d.y,dt=Math.max(.035,(now-d.t)/1000);
+   // A flick is a movement toward the far end; use its speed for power, not its length.
+   const vx=dx/dt,vy=dy/dt; const forward=Math.max(0,-vy);
+   drag=null;
+   if(forward<90){showMessage('奥に向かってフリックしてね！');draw();return}
+   const speed=Math.hypot(vx,vy);
+   const power=Math.max(.38,Math.min(1.35,speed/1000));
+   // horizontal component bends the ball; a vertical swipe goes straight.
+   const curve=Math.max(-1,Math.min(1,(vx/Math.max(100,forward))*1.7));
+   launch(curve,power,speed);
+ }
+ function launch(curve,power,speed){
+   canThrow=false;showMessage('投球中…');$('hint').textContent='球が転がっています…';
+   const targetX=W*.5+curve*W*.44;
+   const gutter=Math.abs(curve)>.83;
+   const duration=850+Math.random()*200;
+   const start=performance.now();
+   anim={phase:'rolling',x:ball.x,y:ball.y,progress:0};
+   function frame(now){
+     if(!anim)return;
+     const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,2);
+     const laneCenter=W*.5+curve*W*.37*ease;
+     anim.progress=t;anim.x=ball.x+(laneCenter-ball.x)*ease;anim.y=ball.y+(H*.27-ball.y)*ease;
+     draw();
+     if(t<1){requestAnimationFrame(frame);return}
+     anim=null;
+     if(gutter){
+       lastKnocked=0;showMessage('ガーター！ 今回は0本');
+       animatePins(0,curve,()=>{
+         finishThrow();
+       });
+       return;
+     }
+     // Straight aim intentionally knocks about 4–5 pins. Better speed/aim can improve the count.
+     let count;
+     const straightness=1-Math.min(1,Math.abs(curve)*1.5);
+     const powerBonus=power>.82?1:power<.52?-1:0;
+     if(straightness>.82) count=4+(Math.random()<.55?1:0)+powerBonus;
+     else {
+       const aimBonus=Math.abs(curve)>.25&&Math.abs(curve)<.66?1:0;
+       count=3+Math.round(straightness*2)+aimBonus+powerBonus+(Math.random()<.22?1:0);
+     }
+     count=Math.max(1,Math.min(9,count));
+     lastKnocked=count;total+=count;
+     showMessage(count+'本倒れた！');
+     animatePins(count,curve,()=>finishThrow());
+   }
+   requestAnimationFrame(frame);
+ }
+ function animatePins(count,curve,done){
+   const order=pins.map((p,i)=>({p,i,score:Math.abs((p.x-W*.5)/W-curve*.13)})).sort((a,b)=>a.score-b.score);
+   order.slice(0,count).forEach((o,i)=>{o.p.down=true;o.p.dx=(Math.random()-.5)*W*.06;o.p.dy=5+Math.random()*12;o.p.rot=(Math.random()-.5)*1.6});
+   const start=performance.now(),dur=600;
+   function frame(now){draw();if(now-start<dur){requestAnimationFrame(frame)}else{
+     resetPins();draw();done();
+   }}
+   requestAnimationFrame(frame);
+ }
+ function finishThrow(){
+   updateStats();
+   if(total>=8){showResult(true);return}
+   if(throwNo===1){
+     throwNo=2;canThrow=true;ball={x:W*.5,y:H*.82,r:Math.min(W*.105,43)};
+     updateStats();showMessage('2投目！ あと'+(8-total)+'本でクリア');$('hint').textContent='ピンは9本に復活！ もう一度フリック';draw();
+   }else{showResult(false)}
+ }
+ function showResult(win){
+   canThrow=false;$('resultTitle').textContent=win?'クリア！ 🎉':'チャレンジ終了';
+   $('resultText').textContent=win?'2投の合計で'+total+'本！ 8本以上倒しました。お見事！':'2投の合計は'+total+'本。あと'+Math.max(0,8-total)+'本でした。方向とフリック速度を変えて再挑戦！';
+   $('overlay').style.display='flex';showMessage(win?'チャレンジ成功！':'もう一度挑戦してみよう');
+ }
+ canvas.addEventListener('pointerdown',pointerDown);
+ canvas.addEventListener('pointermove',pointerMove);
+ canvas.addEventListener('pointerup',pointerUp);
+ canvas.addEventListener('pointercancel',()=>{drag=null;draw()});
+ $('resetTop').addEventListener('click',resetGame);
+ $('again').addEventListener('click',resetGame);
+ $('throwBtn').addEventListener('click',()=>{showMessage('奥に向かってすばやくフリック！ 左右の動きで球の向きが変わります。');});
+ window.addEventListener('resize',resize);
+ resize();
+})();
+</script>
+</body>
+</html>
