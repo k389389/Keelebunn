@@ -16,9 +16,9 @@ main{max-width:900px;margin:auto}
 .statusbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 12px;color:#fff8e9;font-weight:700;text-shadow:0 1px 3px #45250f}
 .turn{background:#fff2d4;color:#583719;border-radius:999px;padding:7px 14px;box-shadow:0 2px 5px #4a2b1766;text-shadow:none}
 .board-wrap{padding:clamp(9px,2vw,18px);border-radius:22px;background:linear-gradient(135deg,#9b5d2d,#e6b96f 20%,#9b602e 48%,#e9c27b 75%,#75431f);box-shadow:0 12px 25px #3d210b88,inset 0 2px 4px #fff9c9;position:relative}
-.board{background:linear-gradient(135deg,#e8c78d,#b77c3c 45%,#f1d69f);border:5px solid #8b5527;border-radius:16px;padding:clamp(10px,2.2vw,20px);box-shadow:inset 0 3px 12px #70401888,0 2px 2px #fff5c2;display:grid;grid-template-columns:minmax(58px, .75fr) 1fr minmax(58px,.75fr);grid-template-rows:auto auto;gap:10px;position:relative}
-.side{display:grid;place-items:center;grid-row:1/3;min-height:270px}
-.store{width:100%;height:100%;min-height:245px;border-radius:45% / 14%;border:4px solid #9b632b;background:linear-gradient(100deg,#8d572b,#f2d49a 28%,#d7a65e 70%,#805020);box-shadow:inset 0 5px 12px #55301499,0 2px 4px #fff1bd;display:flex;flex-direction:column;align-items:center;justify-content:space-around;padding:12px 5px;position:relative}
+.board{background:linear-gradient(135deg,#e8c78d,#b77c3c 45%,#f1d69f);border:5px solid #8b5527;border-radius:16px;padding:clamp(10px,2.2vw,20px);box-shadow:inset 0 3px 12px #70401888,0 2px 2px #fff5c2;display:grid;grid-template-columns:minmax(34px, .30fr) 1fr minmax(34px,.30fr);grid-template-rows:auto auto;gap:10px;position:relative}
+.side{display:grid;place-items:center;grid-row:1/3;min-height:0}
+.store{width:100%;height:70%;min-height:125px;max-height:175px;border-radius:45% / 14%;border:4px solid #9b632b;background:linear-gradient(100deg,#8d572b,#f2d49a 28%,#d7a65e 70%,#805020);box-shadow:inset 0 5px 12px #55301499,0 2px 4px #fff1bd;display:flex;flex-direction:column;align-items:center;justify-content:space-around;padding:12px 5px;position:relative}
 .store-label{font-size:12px;font-weight:800;color:#75451e}
 .store-count{font-size:clamp(22px,5vw,34px);font-weight:900;color:#5b3518;text-shadow:0 1px #ffe9b8}
 .pits-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(4px,1vw,10px);align-items:center}
@@ -27,7 +27,7 @@ main{max-width:900px;margin:auto}
 .pit:disabled{cursor:default;filter:saturate(.75)}
 .pit.available{outline:3px solid #fff4b0;box-shadow:0 0 0 5px #7a4a1b,inset 0 6px 12px #5d351f88;animation:pulse 1.2s infinite}
 @keyframes pulse{50%{filter:brightness(1.16)}}
-.pit-num{position:absolute;top:-21px;font-size:12px;font-weight:900;color:#5b3518;text-shadow:0 1px #fff0c4}
+.pit-num{position:absolute;top:-21px;font-size:12px;font-weight:900;color:#5b3518;text-shadow:0 1px #fff0c4}.pit-count{position:absolute;bottom:4px;right:5px;min-width:19px;height:19px;padding:0 4px;border-radius:10px;background:#fff3d9;color:#573519;font-size:11px;line-height:19px;font-weight:900;box-shadow:0 1px 3px #4a2b1766}
 .bottom .pit-num{top:auto;bottom:-21px}
 .stone{width:clamp(12px,2.6vw,22px);height:clamp(12px,2.6vw,22px);border-radius:50%;box-shadow:inset -3px -4px 5px #0005,inset 2px 2px 4px #fff9,0 2px 2px #5a371c88;border:1px solid #ffffff66;flex:0 0 auto}
 .s0{background:radial-gradient(circle at 30% 25%,#ffd5e8,#bd4f91 65%,#76295b)}
@@ -48,7 +48,7 @@ button{font:inherit}
 .dialog{background:#fff0d1;border:4px solid #b47a3d;border-radius:20px;padding:24px;text-align:center;max-width:360px;width:100%;box-shadow:0 12px 35px #0008}
 .dialog h2{margin:0 0 10px;color:#6b3c1d}
 .dialog p{line-height:1.7}
-@media(max-width:520px){body{padding:9px 6px 18px}.board{gap:6px;padding:10px 7px;grid-template-columns:minmax(49px,.65fr) 1fr minmax(49px,.65fr)}.side{min-height:220px}.store{min-height:210px;border-width:3px}.pit{height:clamp(76px,20vw,104px);border-width:3px}.pit-num{font-size:10px;top:-17px}.bottom .pit-num{top:auto;bottom:-17px}.stone{width:clamp(10px,2.7vw,15px);height:clamp(10px,2.7vw,15px)}}
+@media(max-width:520px){body{padding:9px 6px 18px}.board{gap:6px;padding:10px 7px;grid-template-columns:minmax(30px,.28fr) 1fr minmax(30px,.28fr)}.side{min-height:0}.store{min-height:115px;height:68%;max-height:145px;border-width:3px}.pit{height:clamp(76px,20vw,104px);border-width:3px}.pit-num{font-size:10px;top:-17px}.bottom .pit-num{top:auto;bottom:-17px}.stone{width:clamp(10px,2.7vw,15px);height:clamp(10px,2.7vw,15px)}}
 </style>
 </head>
 <body>
@@ -57,7 +57,7 @@ button{font:inherit}
  <div class="statusbar"><span>あなた：下側（1〜6）</span><span class="turn" id="turn">あなたの番</span><span>CPU：上側（8〜13）</span></div>
  <div class="board-wrap">
   <section class="board" aria-label="マンカラ盤面">
-   <div class="side" style="grid-column:1"><div class="store"><span class="store-label">あなたのゴール ⑦</span><div id="store7" class="stones"></div><span class="store-count" id="count7">0</span></div></div>
+   <div class="side" style="grid-column:1"><div class="store"><span class="store-label">CPUのゴール ⑭</span><div id="store14" class="stones"></div><span class="store-count" id="count14">0</span></div></div>
    <div class="pits-row top" id="toprow" style="grid-column:2;grid-row:1"></div>
    <div class="pits-row bottom" id="bottomrow" style="grid-column:2;grid-row:2"></div>
    <div class="side" style="grid-column:3"><div class="store"><span class="store-label">あなたのゴール ⑦</span><div id="store7" class="stones"></div><span class="store-count" id="count7">0</span></div></div>
@@ -96,12 +96,27 @@ button{font:inherit}
   $('turn').textContent=finished?'終了':turn==='human'?'あなたの番':'CPUの番';
   document.querySelectorAll('.pit').forEach(b=>{const i=+b.dataset.pit;b.disabled=finished||busy||turn!=='human'||!isHuman(i)||pits[i]===0;b.classList.toggle('available',!b.disabled&&pits[i]>0);});
  }
- function pitHTML(i){return `<button class="pit" data-pit="${i}" aria-label="ポケット${i}、石${pits[i]}個" ${pits[i]===0?'disabled':''}><span class="pit-num">${i}</span>${beadMarkup(pits[i],i)}</button>`;}
+ function pitHTML(i){return `<button class="pit" data-pit="${i}" aria-label="ポケット${i}、石${pits[i]}個" ${pits[i]===0?'disabled':''}><span class="pit-num">${i}</span>${beadMarkup(pits[i],i)}<span class="pit-count">${pits[i]}</span></button>`;}
  function beep(freq=520,duration=.07){if(!soundOn)return;try{audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=freq;o.connect(g);g.connect(audioCtx.destination);g.gain.setValueAtTime(.07,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.start();o.stop(audioCtx.currentTime+duration);}catch(e){}}
  function nextPit(i){i++;if(i>14)i=1;if(i===14)return 1;return i;}
- function sow(start,side){
-  let stones=pits[start];pits[start]=0;let pos=start,last=pos;
-  while(stones>0){pos=nextPit(pos);if(side==='human'&&pos===14)continue;if(side==='cpu'&&pos===7)continue;pits[pos]++;stones--;last=pos;beep(420+((pos%5)*65),.045);}
+ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+ async function sow(start,side){
+  let stones=pits[start];
+  pits[start]=0;
+  render();
+  await wait(180);
+  let pos=start,last=pos;
+  while(stones>0){
+   pos=nextPit(pos);
+   if(side==='human'&&pos===14)continue;
+   if(side==='cpu'&&pos===7)continue;
+   pits[pos]++;
+   stones--;
+   last=pos;
+   beep(420+((pos%5)*65),.045);
+   render();
+   await wait(230);
+  }
   return last;
  }
  function sideEmpty(side){let arr=side==='human'?[1,2,3,4,5,6]:[8,9,10,11,12,13];return arr.every(i=>pits[i]===0);}
@@ -113,15 +128,56 @@ button{font:inherit}
    $('result').textContent=title;$('resulttext').textContent=desc;$('overlay').style.display='flex';$('message').textContent=title;beep(760,.22);return true;
   }return false;
  }
- function humanMove(i){if(turn!=='human'||busy||finished||pits[i]===0)return;busy=true;render();const last=sow(i,'human');if(checkEnd())return;if(last===7){turn='human';busy=false;$('message').textContent='最後の石があなたのゴールに入りました！もう一度どうぞ。';}else{turn='cpu';busy=false;$('message').textContent='CPUの番です…';}render();if(turn==='cpu')setTimeout(cpuMove,700);}
- function cpuMove(){
-  if(finished||turn!=='cpu')return;const choices=[8,9,10,11,12,13].filter(i=>pits[i]>0);if(!choices.length){checkEnd();return;}
+ async function humanMove(i){
+  if(turn!=='human'||busy||finished||pits[i]===0)return;
+  busy=true;
+  render();
+  const last=await sow(i,'human');
+  if(checkEnd())return;
+  if(last===7){
+   turn='human';
+   busy=false;
+   $('message').textContent='最後の石があなたのゴールに入りました！もう一度どうぞ。';
+  }else{
+   turn='cpu';
+   busy=false;
+   $('message').textContent='CPUの番です…';
+  }
+  render();
+  if(turn==='cpu')setTimeout(cpuMove,700);
+ }
+ async function cpuMove(){
+  if(finished||turn!=='cpu')return;
+  const choices=[8,9,10,11,12,13].filter(i=>pits[i]>0);
+  if(!choices.length){checkEnd();return;}
   // CPUはゴールに入ってもう一度打てる手を優先。なければ石数の多いポケットを選ぶ
   let best=choices[0],bestScore=-1;
-  for(const i of choices){let count=pits[i],pos=i;while(count>0){pos=nextPit(pos);if(pos===7)continue;count--;}let score=(pos===14?100:0)+pits[i];if(score>bestScore){bestScore=score;best=i;}}
-  const last=sow(best,'cpu');if(checkEnd())return;
-  if(last===14){turn='cpu';$('message').textContent='CPUはゴールに入れて、もう一度！';render();setTimeout(cpuMove,650);}
-  else{turn='human';$('message').textContent='あなたの番です。下側のポケットを選んでください。';render();}
+  for(const i of choices){
+   let count=pits[i],pos=i;
+   while(count>0){
+    pos=nextPit(pos);
+    if(pos===7)continue;
+    count--;
+   }
+   let score=(pos===14?100:0)+pits[i];
+   if(score>bestScore){bestScore=score;best=i;}
+  }
+  busy=true;
+  render();
+  const last=await sow(best,'cpu');
+  if(checkEnd())return;
+  if(last===14){
+   turn='cpu';
+   busy=false;
+   $('message').textContent='CPUはゴールに入れて、もう一度！';
+   render();
+   setTimeout(cpuMove,650);
+  }else{
+   turn='human';
+   busy=false;
+   $('message').textContent='あなたの番です。下側のポケットを選んでください。';
+   render();
+  }
  }
  document.addEventListener('click',e=>{const b=e.target.closest('.pit');if(b)humanMove(+b.dataset.pit);});
  $('newgame').addEventListener('click',init);$('again').addEventListener('click',init);
